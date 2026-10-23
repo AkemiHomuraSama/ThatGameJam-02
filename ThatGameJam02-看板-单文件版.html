@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>声音即视野 · 项目管理</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 13px; color: #1f2329; background: #f3f5f8; overflow: hidden;
+}
+.app { display: flex; height: 100vh; }
+
+/* ---------- 左侧导航 ---------- */
+.side {
+  width: 200px; flex: 0 0 200px; background: #fff;
+  border-right: 1px solid #e5e6eb; display: flex; flex-direction: column;
+}
+.side .logo {
+  height: 52px; display: flex; align-items: center; gap: 9px;
+  padding: 0 16px; border-bottom: 1px solid #e5e6eb;
+}
+.side .logo .mark {
+  width: 22px; height: 22px; border-radius: 5px; background: #3370ff;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 11px; font-weight: 600;
+}
+.side .logo .pn { font-size: 13px; font-weight: 600; }
+.side .logo .sub { font-size: 11px; color: #8f959e; margin-top: 1px; }
+.side .grp { padding: 12px 8px 4px; font-size: 11px; color: #8f959e; padding-left: 18px; }
+.side .item {
+  display: flex; align-items: center; gap: 8px; padding: 7px 18px;
+  cursor: pointer; color: #4e5969; border-left: 2px solid transparent;
+}
+.side .item:hover { background: #f5f7fa; }
+.side .item.on { background: #eaf1ff; color: #3370ff; border-left-color: #3370ff; font-weight: 500; }
+.side .item .cnt { margin-left: auto; font-size: 11px; color: #8f959e; }
+.side .dot { width: 6px; height: 6px; border-radius: 50%; }
+.side .foot { margin-top: auto; padding: 12px 18px; font-size: 11px; color: #a9aeb8; border-top: 1px solid #e5e6eb; }
+
+/* ---------- 主区 ---------- */
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar {
+  height: 52px; flex: 0 0 52px; background: #fff; border-bottom: 1px solid #e5e6eb;
+  display: flex; align-items: center; padding: 0 20px; gap: 14px;
+}
+.topbar h1 { font-size: 15px; font-weight: 600; }
+.topbar .crumb { font-size: 12px; color: #8f959e; }
+.topbar .right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.btn {
+  border: 1px solid #d0d3d9; background: #fff; color: #4e5969;
+  padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;
+  font-family: inherit;
+}
+.btn:hover { border-color: #3370ff; color: #3370ff; }
+.btn.pri { background: #3370ff; border-color: #3370ff; color: #fff; }
+.btn.pri:hover { background: #245bdb; color: #fff; }
+
+.content { flex: 1; overflow: auto; padding: 16px 20px 24px; }
+
+/* ---------- 统计卡 ---------- */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.card {
+  background: #fff; border: 1px solid #e5e6eb; border-radius: 6px; padding: 12px 14px;
+}
+.card .k { font-size: 11px; color: #8f959e; }
+.card .v { font-size: 21px; font-weight: 600; margin-top: 3px; line-height: 1.2; }
+.card .v small { font-size: 12px; font-weight: 400; color: #8f959e; }
+.card.warn .v { color: #f54a45; }
+.card.ok .v { color: #00a870; }
+
+/* ---------- 工具条 ---------- */
+.toolbar {
+  background: #fff; border: 1px solid #e5e6eb; border-radius: 6px;
+  padding: 9px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;
+}
+.toolbar label { font-size: 12px; color: #8f959e; }
+select, input[type=text] {
+  border: 1px solid #d0d3d9; border-radius: 4px; padding: 4px 7px;
+  font-size: 12px; font-family: inherit; color: #1f2329; background: #fff; outline: none;
+}
+select:focus, input[type=text]:focus { border-color: #3370ff; }
+input[type=text] { width: 150px; }
+.seg { display: flex; border: 1px solid #d0d3d9; border-radius: 4px; overflow: hidden; }
+.seg button {
+  border: 0; background: #fff; padding: 4px 10px; font-size: 12px; cursor: pointer;
+  color: #4e5969; font-family: inherit; border-right: 1px solid #d0d3d9;
+}
+.seg button:last-child { border-right: 0; }
+.seg button.on { background: #3370ff; color: #fff; }
+.spacer { margin-left: auto; }
+
+/* ---------- 表格 ---------- */
+.tw { background: #fff; border: 1px solid #e5e6eb; border-radius: 6px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  background: #f7f8fa; text-align: left; font-size: 12px; font-weight: 500; color: #8f959e;
+  padding: 8px 10px; border-bottom: 1px solid #e5e6eb; white-space: nowrap; position: sticky; top: 0; z-index: 2;
+}
+tbody td { padding: 7px 10px; border-bottom: 1px solid #f0f1f3; vertical-align: middle; }
+tbody tr:hover { background: #f7f9ff; }
+tbody tr.done { opacity: .5; }
+td.id { font-family: Consolas, monospace; font-size: 12px; color: #3370ff; cursor: pointer; white-space: nowrap; }
+td.title { min-width: 230px; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gh {
+  padding: 7px 10px; background: #f0f4ff; font-size: 12px; font-weight: 600; color: #245bdb;
+  border-bottom: 1px solid #e5e6eb; display: flex; gap: 8px; align-items: center;
+}
+.gh .n { font-weight: 400; color: #8f959e; }
+
+/* ---------- 树形表格 ---------- */
+.tname { display: flex; align-items: center; gap: 6px; }
+.tname .arw { width: 13px; flex: 0 0 13px; color: #8f959e; cursor: pointer; text-align: center; font-size: 11px; }
+.tname .arw:hover { color: #3370ff; }
+.tname .arw.none { cursor: default; color: #dcdfe5; }
+.tname .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tname .sub { margin-left: 8px; color: #8f959e; font-size: 11px; flex: 0 0 auto; }
+tbody tr.epic-row td { background: #f5f8ff; font-weight: 600; }
+tbody tr.feat-row td { background: #fbfcfe; }
+tbody tr.epic-row:hover td, tbody tr.feat-row:hover td { background: #eef4ff; }
+.pth { font-size: 11px; color: #8f959e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
+
+/* ---------- 标签 ---------- */
+.tag {
+  display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px;
+  line-height: 17px; white-space: nowrap;
+}
+.p0 { background: #fdeceb; color: #d54941; }
+.p1 { background: #fff3e5; color: #d97706; }
+.p2 { background: #f2f3f5; color: #8f959e; }
+.ep { background: #eaf1ff; color: #245bdb; }
+.gy { background: #eaf7f0; color: #0a7a4b; }
+.gp { background: #fff8e6; color: #a3651a; }
+.gn { background: #f2f3f5; color: #6b7075; }
+.st { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; font-size: 12px; }
+.st .d { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 7px; }
+.s0 .d { background: #c9cdd4; } .s1 .d { background: #3370ff; }
+.s2 .d { background: #ff8800; } .s3 .d { background: #9254de; } .s4 .d { background: #00a870; }
+.s4 { color: #00a870; }
+.av {
+  width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center;
+  justify-content: center; font-size: 10px; color: #fff; margin-right: 5px; vertical-align: middle;
+}
+.r0 { background: #3370ff; } .r1 { background: #9254de; } .r2 { background: #00a870; }
+.r3 { background: #ff8800; } .r4 { background: #4e5969; }
+
+/* ---------- 看板 ---------- */
+.board { display: grid; grid-template-columns: repeat(5, minmax(190px, 1fr)); gap: 10px; align-items: start; }
+.col { background: #fff; border: 1px solid #e5e6eb; border-radius: 6px; display: flex; flex-direction: column; }
+.col .ch {
+  padding: 9px 12px; border-bottom: 1px solid #e5e6eb; font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+}
+.col .ch .n { margin-left: auto; font-weight: 400; color: #8f959e; }
+.col .cb { padding: 8px; display: flex; flex-direction: column; gap: 7px; min-height: 60px; }
+.tk {
+  border: 1px solid #e5e6eb; border-radius: 5px; padding: 8px 9px; cursor: pointer; background: #fff;
+}
+.tk:hover { border-color: #3370ff; }
+.tk .t1 { display: flex; gap: 5px; align-items: center; margin-bottom: 4px; }
+.tk .t2 { font-size: 12px; line-height: 1.45; margin-bottom: 5px; }
+.tk .t3 { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #8f959e; }
+.tk .mv { margin-left: auto; color: #3370ff; }
+
+/* ---------- 统计页 ---------- */
+.sec { background: #fff; border: 1px solid #e5e6eb; border-radius: 6px; padding: 14px 16px; margin-bottom: 12px; }
+.sec h3 { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+.bar { display: grid; grid-template-columns: 74px 1fr 96px; gap: 10px; align-items: center; margin-bottom: 8px; font-size: 12px; }
+.bar .tr { background: #f2f3f5; height: 16px; border-radius: 3px; overflow: hidden; position: relative; }
+.bar .fl { height: 100%; background: #3370ff; border-radius: 3px; }
+.bar .fl.over { background: #f54a45; }
+.bar .cap { position: absolute; left: calc(100% - 2px); top: -2px; bottom: -2px; width: 2px; background: #4e5969; }
+.bar .tx { text-align: right; color: #4e5969; font-variant-numeric: tabular-nums; }
+.bar .tx b { color: #1f2329; }
+
+/* ---------- 甘特图 ---------- */
+.gwrap { background: #fff; border: 1px solid #e5e6eb; border-radius: 6px; overflow: auto; max-height: calc(100vh - 250px); }
+.gwrap table { border-collapse: separate; border-spacing: 0; width: auto; min-width: 100%; }
+.gwrap thead th { position: sticky; top: 0; z-index: 4; background: #f7f8fa; }
+.gwrap .gside {
+  position: sticky; left: 0; z-index: 3; background: #fff; width: 280px; min-width: 280px;
+  max-width: 280px; text-align: left; font-weight: 400; color: #1f2329;
+}
+.gwrap thead .gside { z-index: 5; background: #f7f8fa; }
+.gwrap .day {
+  width: 34px; min-width: 34px; max-width: 34px; text-align: center; font-size: 11px;
+  color: #8f959e; padding: 5px 0; border-left: 1px solid #eef0f3; line-height: 1.3;
+}
+.gwrap .day b { display: block; font-weight: 500; color: #4e5969; font-size: 11px; }
+.gwrap .day.we, .gwrap td.cwe { background: #fafbfc; color: #c9cdd4; }
+.gwrap .day.we b { color: #b7bcc4; }
+.gwrap .day.td, .gwrap td.ctd { background: #fdeceb; }
+.gwrap .day.td b { color: #d54941; }
+.gwrap td.ctd { box-shadow: inset 2px 0 0 #f54a45; }
+.gwrap td.cell { border-left: 1px solid #f5f6f8; padding: 0; }
+.gwrap tr.grow td { border-bottom: 1px solid #f0f1f3; }
+.gwrap tr.grow:hover td { background: #f7f9ff; }
+.gwrap .gname {
+  padding: 4px 10px; font-size: 12px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; display: flex; align-items: center; gap: 6px;
+}
+.gwrap .gname .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gwrap .gname .d { margin-left: auto; color: #8f959e; font-size: 11px; flex: 0 0 auto; }
+.gwrap tr.gh2 td {
+  background: #f0f4ff; font-size: 12px; font-weight: 600; color: #245bdb;
+  padding: 5px 10px; border-bottom: 1px solid #e5e6eb;
+}
+.gwrap .gbar {
+  height: 17px; border-radius: 3px; margin: 3px 2px; position: relative;
+  cursor: pointer; overflow: hidden;
+}
+.gwrap .gbar:hover { filter: brightness(1.08); }
+.gwrap .gbar span {
+  position: absolute; left: 6px; top: 0; line-height: 17px; font-size: 10px;
+  color: #fff; white-space: nowrap; text-shadow: 0 0 3px rgba(0,0,0,.35);
+}
+.gwrap .gbar.done { opacity: .42; }
+.gwrap .gbar.done span::after { content: " ✓"; }
+.glegend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: #8f959e; margin-top: 8px; }
+.glegend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.gtools { margin-bottom: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* ---------- 拖拽 ---------- */
+.tk { cursor: grab; }
+.tk:active { cursor: grabbing; }
+.tk.dragging { opacity: .4; border-style: dashed; }
+.col .cb.over { background: #f2f6ff; box-shadow: inset 0 0 0 1px #3370ff; border-radius: 5px; }
+.dl { height: 2px; background: #3370ff; border-radius: 2px; margin: 2px 0; }
+
+/* ---------- 表单 ---------- */
+.fm { margin-bottom: 11px; }
+.fm > label { display: block; font-size: 12px; color: #8f959e; margin-bottom: 4px; }
+.fm input, .fm select, .fm textarea {
+  width: 100%; border: 1px solid #d0d3d9; border-radius: 4px; padding: 5px 7px;
+  font-size: 12px; font-family: inherit; color: #1f2329; background: #fff; outline: none;
+}
+.fm input:focus, .fm select:focus, .fm textarea:focus { border-color: #3370ff; }
+.fm .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fm .three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.fm .req::after { content: " *"; color: #f54a45; }
+.err { color: #f54a45; font-size: 12px; margin-bottom: 8px; }
+
+/* ---------- 详情抽屉 ---------- */
+.mask { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; z-index: 20; }
+.mask.on { display: block; }
+.dw {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 400px; background: #fff; z-index: 21;
+  box-shadow: -2px 0 12px rgba(0,0,0,.12); transform: translateX(100%); transition: transform .18s;
+  display: flex; flex-direction: column;
+}
+.dw.on { transform: translateX(0); }
+.dw .dh { padding: 14px 18px; border-bottom: 1px solid #e5e6eb; display: flex; align-items: center; }
+.dw .dh .tid { font-family: Consolas, monospace; color: #3370ff; font-size: 12px; }
+.dw .dh .x { margin-left: auto; cursor: pointer; color: #8f959e; font-size: 18px; line-height: 1; }
+.dw .db { padding: 16px 18px; overflow: auto; flex: 1; }
+.dw .row2 { display: grid; grid-template-columns: 78px 1fr; gap: 10px; margin-bottom: 12px; font-size: 12px; }
+.dw .row2 .k { color: #8f959e; }
+.dw .row2 .v { line-height: 1.6; }
+.dw .tt { font-size: 15px; font-weight: 600; margin-bottom: 14px; line-height: 1.5; }
+.dw .acts { margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap; }
+.empty { padding: 40px; text-align: center; color: #8f959e; }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="side">
+    <div class="logo">
+      <div class="mark"></div>
+      <div>
+        <div class="pn">thatgamejam #02</div>
+      </div>
+    </div>
+    <div class="grp">工作</div>
+    <div class="item on" data-view="story">需求 <span class="cnt" id="cStory"></span></div>
+    <div class="item" data-view="board">看板 <span class="cnt" id="cBoard"></span></div>
+    <div class="item" data-view="gantt">甘特图</div>
+    <div class="item" data-view="stats">统计报表</div>
+    <div class="grp">其他</div>
+    <div class="item" data-view="trash">回收站 <span class="cnt" id="cTrash"></span></div>
+    <div class="foot">数据由 backlog-故事清单.csv 生成<br>状态 / 新增需求保存在本地浏览器</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1 id="vTitle">需求</h1>
+      <span class="crumb" id="vCrumb"></span>
+      <div class="right">
+        <button class="btn pri" id="btnNew">+ 新建需求</button>
+        <button class="btn" id="btnReset">重置状态</button>
+        <button class="btn" id="btnExport">导出 CSV</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="stats" id="stats"></div>
+
+      <div class="toolbar" id="toolbar">
+        <label>Epic</label><select id="fEpic"></select>
+        <label>迭代</label><select id="fSprint"></select>
+        <label>优先级</label><select id="fPri"></select>
+        <label>处理人</label><select id="fRole"></select>
+        <label>状态</label><select id="fStatus"></select>
+        <input type="text" id="fKw" placeholder="搜索标题 / ID">
+        <span class="spacer"></span>
+      </div>
+
+      <div id="view"></div>
+    </div>
+  </main>
+</div>
+
+<div class="mask" id="mask"></div>
+<div class="dw" id="dw">
+  <div class="dh"><span class="tid" id="dId"></span><span class="x" id="dX">×</span></div>
+  <div class="db" id="dBody"></div>
+</div>
+
+<script>
+// 由 backlog-故事清单.csv 自动生成，请勿手改（node build-data.js）
+const EPIC_DEF={"BUILD":{"name":"构建完整可玩的游戏","color":"#3370ff"},"POLISH":{"name":"优化游戏体验","color":"#00a870"},"COVER":{"name":"游戏封面和宣传gif","color":"#ff8800"},"INTRO":{"name":"游戏开场引入动画","color":"#9254de"}};
+const SPRINTS={"S0":{"name":"S0 预备","start":"10/22","end":"10/23"},"S1":{"name":"S1 垂直切片","start":"10/24","end":"10/29"},"S2":{"name":"S2 内容量产","start":"10/30","end":"11/03"},"S3":{"name":"S3 打磨出包","start":"11/04","end":"11/07"}};
+const ROLES=["程序","音频","美术A","美术B","策划"];
+const STATUSES=["Backlog","本周","进行中","待验收","完成"];
+const STORIES=[{"id":"PREP-01","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"工程与构建环境（仓库/编辑器/可运行）","feature":"准备与定型","module":"F0.1 工程与环境","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S0","role":"程序","dep":"","type":"story"},{"id":"PREP-02","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"数值与关卡数据外置（tuning.json / level json）","feature":"准备与定型","module":"F0.1 工程与环境","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S0","role":"程序","dep":"","type":"story"},{"id":"PREP-03","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"灰盒工程化与 Windows 打包（Electron / Tauri）","feature":"准备与定型","module":"F0.2 灰盒演进","raw":1.5,"gray":"已","days":0.5,"pri":"P0","sprint":"S0","role":"程序","dep":"PREP-01","type":"story"},{"id":"PREP-04","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"三个核心音合成试听（呼吸/心跳/回声）","feature":"准备与定型","module":"F0.2 灰盒演进","raw":1,"gray":"部分","days":0.5,"pri":"P0","sprint":"S0","role":"音频","dep":"","type":"story"},{"id":"PREP-05","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"命题音乐独立聆听与汇总（10/24后）","feature":"准备与定型","module":"F0.3 开题与冻结","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S1","role":"策划","dep":"命题音乐","type":"story"},{"id":"PREP-06","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"冻结设计 + 定下故事方向一句话（含情绪板方向）+ 命题音乐回应","feature":"准备与定型","module":"F0.3 开题与冻结","raw":1,"gray":"未","days":1,"pri":"P0","sprint":"S1","role":"策划","dep":"PREP-05","type":"story"},{"id":"MOVE-01","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"跑动惯性与加速度","feature":"移动层","module":"F2.1 基础移动","raw":1,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"PREP-03","type":"story"},{"id":"MOVE-02","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"跳跃与二段跳","feature":"移动层","module":"F2.2 跳跃","raw":1,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"MOVE-01","type":"story"},{"id":"MOVE-03","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"手感三件套（coyote/buffer/落地缓冲）","feature":"移动层","module":"F2.2 跳跃","raw":1,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"MOVE-02","type":"story"},{"id":"MOVE-04","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"确认所有台阶都跳得上去","feature":"移动层","module":"F2.2 跳跃","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S1","role":"策划","dep":"MOVE-02","type":"story"},{"id":"MOVE-05","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"落地/撞击发出对应强度的声音","feature":"移动层","module":"F2.3 落地产出","raw":1.5,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"MOVE-02","type":"story"},{"id":"MOVE-06","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"原地跳跃即跺脚（无独立发声键）","feature":"移动层","module":"F2.3 落地产出","raw":1,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"MOVE-05","type":"story"},{"id":"SENSE-01","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"发声后声波扩散照亮周围地形","feature":"感知层","module":"F1.1 声波照亮","raw":2,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"MOVE-05","type":"story"},{"id":"SENSE-02","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"走过的地方逐渐变暗最后只剩红雾","feature":"感知层","module":"F1.1 声波照亮","raw":1.5,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"SENSE-01","type":"story"},{"id":"SENSE-03","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"发声时白线散射探地形撞墙即停","feature":"感知层","module":"F1.2 散射探地形","raw":2,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"SENSE-01","type":"story"},{"id":"SENSE-04","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"射线参数化与性能验证","feature":"感知层","module":"F1.2 散射探地形","raw":1,"gray":"已","days":0.5,"pri":"P2","sprint":"S1","role":"程序","dep":"SENSE-03","type":"story"},{"id":"SENSE-05","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"四档可见度分明（含美术材质联调）","feature":"感知层","module":"F1.3 可见度","raw":2,"gray":"已","days":1,"pri":"P0","sprint":"S1","role":"程序","dep":"ART-02","type":"story"},{"id":"SENSE-06","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"声波染色（地形白/敌人红/目标金）","feature":"感知层","module":"F1.3 可见度","raw":1,"gray":"未","days":1,"pri":"P2","sprint":"S2","role":"美术B","dep":"SENSE-05","type":"story"},{"id":"SENSE-07","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"脚步/落地/撞击三档音效","feature":"感知层","module":"F1.4 音频反馈","raw":1.5,"gray":"部分","days":1,"pri":"P1","sprint":"S2","role":"音频","dep":"MOVE-05","type":"story"},{"id":"SENSE-08","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"混音总线与响度预算（回声最高优先级）","feature":"感知层","module":"F1.4 音频反馈","raw":1,"gray":"部分","days":0.5,"pri":"P0","sprint":"S1","role":"音频","dep":"PREP-04","type":"story"},{"id":"SENSE-09","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"环境音乐层（静默为主 + 极低频底噪）","feature":"感知层","module":"F1.4 音频反馈","raw":1.5,"gray":"未","days":1.5,"pri":"P2","sprint":"S3","role":"音频","dep":"PREP-06","type":"story"},{"id":"DREAD-01","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"敌人只在玩家发声时移动一步","feature":"危险层","module":"F3.1 敌人推进","raw":1.5,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"MOVE-05","type":"story"},{"id":"DREAD-02","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"只有附近的敌人会被惊动","feature":"危险层","module":"F3.1 敌人推进","raw":0.5,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"DREAD-01","type":"story"},{"id":"DREAD-03","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"敌人 y 轴跟随玩家高度","feature":"危险层","module":"F3.1 敌人推进","raw":0.5,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"DREAD-01","type":"story"},{"id":"DREAD-04","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"危险度计算（最近敌人距离）","feature":"危险层","module":"F3.2 危险度与听感","raw":0.5,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"DREAD-01","type":"story"},{"id":"DREAD-05","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"越危险心跳越快呼吸越急促（连续渐变）","feature":"危险层","module":"F3.2 危险度与听感","raw":2,"gray":"部分","days":1.5,"pri":"P0","sprint":"S2","role":"音频","dep":"DREAD-04","type":"story"},{"id":"DREAD-06","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"极度危险时屏幕边缘泛红","feature":"危险层","module":"F3.2 危险度与听感","raw":0.5,"gray":"未","days":0.5,"pri":"P2","sprint":"S2","role":"美术B","dep":"DREAD-05","type":"story"},{"id":"DREAD-07","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"撞上敌人结束且照亮区内敌人现形","feature":"危险层","module":"F3.3 碰撞与重来","raw":1,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"SENSE-05","type":"story"},{"id":"DREAD-08","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"失败后 2 秒内回到可玩状态","feature":"危险层","module":"F3.3 碰撞与重来","raw":1.5,"gray":"已","days":0.5,"pri":"P0","sprint":"S1","role":"程序","dep":"DREAD-07","type":"story"},{"id":"DREAD-09","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"危险层音乐变化","feature":"危险层","module":"F3.2 危险度与听感","raw":1,"gray":"未","days":1,"pri":"P2","sprint":"S3","role":"音频","dep":"DREAD-05","type":"story"},{"id":"ECHO-01","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"回声充能制（禁止队列实现）","feature":"回声定位","module":"F4.1 充能冷却","raw":2,"gray":"部分","days":1,"pri":"P0","sprint":"S2","role":"音频","dep":"MOVE-05","type":"story"},{"id":"ECHO-02","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"冷却与距离联动（远10s→近2s，下限2s）","feature":"回声定位","module":"F4.1 充能冷却","raw":1,"gray":"部分","days":0.5,"pri":"P0","sprint":"S2","role":"音频","dep":"ECHO-01","type":"story"},{"id":"ECHO-03","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"左右用声像编码（盲测准确率>90%）","feature":"回声定位","module":"F4.2 双通道编码","raw":1.5,"gray":"部分","days":1,"pri":"P0","sprint":"S2","role":"音频","dep":"ECHO-01","type":"story"},{"id":"ECHO-04","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"上下用音高编码","feature":"回声定位","module":"F4.2 双通道编码","raw":1.5,"gray":"部分","days":1,"pri":"P0","sprint":"S2","role":"音频","dep":"ECHO-03","type":"story"},{"id":"ECHO-05","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"音量传达距离（冗余通道）","feature":"回声定位","module":"F4.2 双通道编码","raw":0.5,"gray":"部分","days":0.5,"pri":"P2","sprint":"S2","role":"音频","dep":"ECHO-02","type":"story"},{"id":"ECHO-06","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"外放玩家的视觉兜底（屏幕边缘微光）","feature":"回声定位","module":"F4.3 兜底","raw":1.5,"gray":"未","days":1.5,"pri":"P0","sprint":"S3","role":"美术B","dep":"ECHO-03","type":"story"},{"id":"ECHO-07","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"听障玩家提示与降级方案","feature":"回声定位","module":"F4.3 兜底","raw":0.5,"gray":"未","days":0.5,"pri":"P2","sprint":"S3","role":"策划","dep":"ECHO-06","type":"story"},{"id":"ECHO-08","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"回声音色降调与玩家发声区分","feature":"回声定位","module":"F4.4 音色","raw":1.5,"gray":"部分","days":1,"pri":"P0","sprint":"S2","role":"音频","dep":"PREP-04","type":"story"},{"id":"TORCH-01","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"走到火把跟前发声点亮","feature":"火把与人形","module":"F5.1 火把机制","raw":1,"gray":"已","days":0.5,"pri":"P0","sprint":"S2","role":"程序","dep":"MOVE-05","type":"story"},{"id":"TORCH-02","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"火把范围内永久清晰（唯一稳定光源）","feature":"火把与人形","module":"F5.1 火把机制","raw":1,"gray":"已","days":0.5,"pri":"P0","sprint":"S2","role":"程序","dep":"TORCH-01","type":"story"},{"id":"TORCH-03","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"火把连线构成可辨识的蜷缩人形","feature":"火把与人形","module":"F5.2 人形","raw":1.5,"gray":"部分","days":1,"pri":"P0","sprint":"S2","role":"美术A","dep":"TORCH-02","type":"story"},{"id":"TORCH-04","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"胜利时所有火把自动亮起","feature":"火把与人形","module":"F5.2 人形","raw":0.5,"gray":"已","days":0.5,"pri":"P0","sprint":"S2","role":"程序","dep":"TORCH-03","type":"story"},{"id":"TORCH-05","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"胜利镜头（拉远+火把依次亮+音乐起）","feature":"火把与人形","module":"F5.3 胜利","raw":2,"gray":"已","days":1,"pri":"P0","sprint":"S3","role":"程序","dep":"TORCH-04","type":"story"},{"id":"TORCH-06","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"胜负判定完整闭环","feature":"火把与人形","module":"F5.3 胜利","raw":1,"gray":"已","days":0.5,"pri":"P0","sprint":"S3","role":"程序","dep":"TORCH-05","type":"story"},{"id":"TORCH-07","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"胜利曲（命题音乐回应，全曲首次完整响起）","feature":"火把与人形","module":"F5.3 胜利","raw":2,"gray":"未","days":2,"pri":"P0","sprint":"S3","role":"音频","dep":"PREP-06","type":"story"},{"id":"ART-00A","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"美术风格探索：场景与地形方向（2-3 稿）","feature":"2D横版美术","module":"F8.0 风格探索","raw":1.5,"gray":"未","days":1.5,"pri":"P0","sprint":"S1","role":"美术A","dep":"","type":"story"},{"id":"ART-00B","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"美术风格探索：角色与动效方向（2-3 稿）","feature":"2D横版美术","module":"F8.0 风格探索","raw":1.5,"gray":"未","days":1.5,"pri":"P0","sprint":"S1","role":"美术B","dep":"","type":"story"},{"id":"ART-01","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"角色剪影与动画（run/jump/fall/land）","feature":"2D横版美术","module":"F8.1 角色与动效","raw":2,"gray":"未","days":2,"pri":"P0","sprint":"S2","role":"美术B","dep":"PREP-06","type":"story"},{"id":"ART-02","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"地形 tileset 与强对比描边（黑暗中可读）","feature":"2D横版美术","module":"F8.2 场景与关卡视觉","raw":2,"gray":"未","days":2,"pri":"P0","sprint":"S2","role":"美术A","dep":"PREP-06","type":"story"},{"id":"ART-03","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"火把模型与火焰粒子","feature":"2D横版美术","module":"F8.2 场景与关卡视觉","raw":1.5,"gray":"未","days":1.5,"pri":"P0","sprint":"S3","role":"美术A","dep":"PREP-06","type":"story"},{"id":"ART-04","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"敌人与另一个自己的造型","feature":"2D横版美术","module":"F8.1 角色与动效","raw":1,"gray":"未","days":1,"pri":"P0","sprint":"S2","role":"美术B","dep":"PREP-06","type":"story"},{"id":"ART-05","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"UI 图标与胜利画面视觉","feature":"2D横版美术","module":"F8.3 UI 与宣传","raw":1,"gray":"未","days":1,"pri":"P2","sprint":"S3","role":"美术B","dep":"PREP-06","type":"story"},{"id":"ART-06","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"背景层次与视差（2D 横版氛围）","feature":"2D横版美术","module":"F8.2 场景与关卡视觉","raw":2,"gray":"未","days":2,"pri":"P2","sprint":"S3","role":"美术A","dep":"ART-02","type":"story"},{"id":"ART-07","epic":"COVER","epicName":"游戏封面和宣传gif","title":"额外宣传物料（社交媒体图 / 第二支 GIF）","feature":"宣传物料","module":"F8.3 UI 与宣传","raw":1.5,"gray":"未","days":1.5,"pri":"P2","sprint":"S3","role":"美术B","dep":"SHIP-06","type":"story"},{"id":"WORLD-01","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"竖向多层地图搭建（2D 横版，美术主导）","feature":"关卡与地图","module":"F6.1 地图","raw":2,"gray":"部分","days":1,"pri":"P1","sprint":"S2","role":"美术A","dep":"ART-02","type":"story"},{"id":"WORLD-02","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"地图缩放功能","feature":"关卡与地图","module":"F6.1 地图","raw":1,"gray":"已","days":0.5,"pri":"P1","sprint":"S3","role":"程序","dep":"WORLD-01","type":"story"},{"id":"WORLD-03","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"无死路验证","feature":"关卡与地图","module":"F6.2 可达性","raw":1.5,"gray":"未","days":1,"pri":"P0","sprint":"S2","role":"策划","dep":"WORLD-01","type":"story"},{"id":"WORLD-04","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"短死路尽头放火把","feature":"关卡与地图","module":"F6.2 可达性","raw":0.5,"gray":"未","days":0.5,"pri":"P2","sprint":"S3","role":"策划","dep":"WORLD-03","type":"story"},{"id":"WORLD-05","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"第一区域线性无敌人靠布局教学","feature":"关卡与地图","module":"F6.3 零文字教学","raw":1.5,"gray":"未","days":1,"pri":"P0","sprint":"S2","role":"策划","dep":"WORLD-01","type":"story"},{"id":"WORLD-06","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"四件事按顺序自然学会","feature":"关卡与地图","module":"F6.3 零文字教学","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S2","role":"策划","dep":"WORLD-05","type":"story"},{"id":"WORLD-07","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"敌人初始点位重排","feature":"关卡与地图","module":"F6.4 点位","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S3","role":"策划","dep":"WORLD-01","type":"story"},{"id":"WORLD-08","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"目标（另一个自己）点位","feature":"关卡与地图","module":"F6.4 点位","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S3","role":"策划","dep":"WORLD-01","type":"story"},{"id":"WORLD-09","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"陷阱一种","feature":"关卡与地图","module":"F6.4 点位","raw":0.5,"gray":"未","days":0.5,"pri":"P2","sprint":"S3","role":"美术A","dep":"WORLD-01","type":"story"},{"id":"SHIP-01","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"Windows 构建可在干净机器运行","feature":"构建与打包","module":"F7.1 构建","raw":1,"gray":"部分","days":1,"pri":"P0","sprint":"S3","role":"程序","dep":"PREP-03","type":"story"},{"id":"SHIP-02","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"Mac 构建","feature":"构建与打包","module":"F7.1 构建","raw":0.5,"gray":"未","days":0.5,"pri":"P2","sprint":"S3","role":"程序","dep":"SHIP-01","type":"story"},{"id":"SHIP-03","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"打包体积与启动速度检查","feature":"构建与打包","module":"F7.1 构建","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S3","role":"程序","dep":"SHIP-01","type":"story"},{"id":"SHIP-04","epic":"COVER","epicName":"游戏封面和宣传gif","title":"封面图 630×500","feature":"itch.io 页面","module":"F7.2 页面","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S3","role":"美术A","dep":"","type":"story"},{"id":"SHIP-05","epic":"COVER","epicName":"游戏封面和宣传gif","title":"截图 4-5 张","feature":"itch.io 页面","module":"F7.2 页面","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S3","role":"美术A","dep":"","type":"story"},{"id":"SHIP-06","epic":"COVER","epicName":"游戏封面和宣传gif","title":"演示 GIF（黑暗游戏说服力的命门）","feature":"itch.io 页面","module":"F7.2 页面","raw":1,"gray":"未","days":1,"pri":"P0","sprint":"S3","role":"美术A","dep":"","type":"story"},{"id":"SHIP-07","epic":"COVER","epicName":"游戏封面和宣传gif","title":"英文描述（耳机提示/Dark Echo声明/AI声明）","feature":"itch.io 页面","module":"F7.2 页面","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S3","role":"策划","dep":"","type":"story"},{"id":"SHIP-08","epic":"COVER","epicName":"游戏封面和宣传gif","title":"Credits 完整并在 Admins 列全员","feature":"itch.io 页面","module":"F7.2 页面","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S3","role":"策划","dep":"","type":"story"},{"id":"SHIP-09","epic":"POLISH","epicName":"优化游戏体验","title":"机制测试清单逐项勾","feature":"测试与修复","module":"F7.3 QA","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S3","role":"策划","dep":"","type":"story"},{"id":"SHIP-10","epic":"POLISH","epicName":"优化游戏体验","title":"外部试玩 3-5 人只听不说","feature":"外部试玩与返工","module":"F7.3 QA","raw":1,"gray":"未","days":1,"pri":"P0","sprint":"S2","role":"策划","dep":"","type":"story"},{"id":"SHIP-11","epic":"POLISH","epicName":"优化游戏体验","title":"帧率基线（1080p 稳定 60）","feature":"测试与修复","module":"F7.3 QA","raw":0.5,"gray":"未","days":0.5,"pri":"P2","sprint":"S3","role":"程序","dep":"","type":"story"},{"id":"SHIP-12","epic":"COVER","epicName":"游戏封面和宣传gif","title":"打 tag + 本地备份 + 构建包存网盘","feature":"提交与归档","module":"F7.3 QA","raw":0.5,"gray":"未","days":0.5,"pri":"P0","sprint":"S3","role":"策划","dep":"SHIP-01","type":"story"},{"id":"ART-08","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"另一个我的模型（蜷缩等待姿态，暖金）","feature":"2D横版美术","module":"F8.1 角色与动效","raw":2,"gray":"未","days":2,"pri":"P0","sprint":"S2","role":"美术B","dep":"PREP-06","type":"story"},{"id":"ART-09","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"另一个我：被发现的抬头反应 / 胜利站起","feature":"2D横版美术","module":"F8.1 角色与动效","raw":1,"gray":"未","days":1,"pri":"P0","sprint":"S3","role":"美术B","dep":"ART-08","type":"story"},{"id":"ART-10","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"接触敌人的结算动画（光与声被吞没 1.5s）","feature":"2D横版美术","module":"F8.1 角色与动效","raw":1.5,"gray":"部分","days":1,"pri":"P0","sprint":"S2","role":"美术B","dep":"ART-01","type":"story"},{"id":"ART-11","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"背景引导元素（脚印/火堆/刻痕/人影/波纹）","feature":"2D横版美术","module":"F8.2 场景与关卡视觉","raw":1.5,"gray":"未","days":1.5,"pri":"P0","sprint":"S3","role":"美术A","dep":"PREP-06","type":"story"},{"id":"TORCH-08","epic":"BUILD","epicName":"构建完整可玩的游戏","title":"接近火把/特殊地块的温暖梦幻音乐层","feature":"火把与人形","module":"F5.1 火把机制","raw":1.5,"gray":"未","days":1.5,"pri":"P0","sprint":"S3","role":"音频","dep":"TORCH-01","type":"story"},{"id":"FEEL-01","epic":"POLISH","epicName":"优化游戏体验","title":"手感调优：跑跳/落地/相机跟随/输入延迟","feature":"手感与数值","module":"F9.1 手感打磨","raw":1.5,"gray":"部分","days":1.5,"pri":"P0","sprint":"S2","role":"程序","dep":"MOVE-03","type":"story"},{"id":"TUNE-01","epic":"POLISH","epicName":"优化游戏体验","title":"数值调优：tuning.json 全表过一遍","feature":"手感与数值","module":"F9.2 数值打磨","raw":1.5,"gray":"未","days":1.5,"pri":"P0","sprint":"S2","role":"策划","dep":"PREP-02","type":"story"},{"id":"SHIP-13","epic":"POLISH","epicName":"优化游戏体验","title":"外部试玩返工（按反馈修）","feature":"外部试玩与返工","module":"F7.3 QA","raw":2,"gray":"未","days":2,"pri":"P0","sprint":"S3","role":"策划","dep":"SHIP-10","type":"story"},{"id":"INTRO-01","epic":"INTRO","epicName":"游戏开场引入动画","title":"开场演出序列（黑暗→第一声→标题浮现）","feature":"开场演出","module":"F10.1 开场演出","raw":1,"gray":"未","days":1,"pri":"P2","sprint":"S3","role":"策划","dep":"","type":"story"},{"id":"INTRO-02","epic":"INTRO","epicName":"游戏开场引入动画","title":"标题画面视觉（游戏名 + 命题音乐进入）","feature":"标题画面","module":"F10.2 标题画面","raw":1,"gray":"未","days":1,"pri":"P2","sprint":"S3","role":"美术A","dep":"","type":"story"},{"id":"INTRO-03","epic":"INTRO","epicName":"游戏开场引入动画","title":"开场音频（命题音乐引入段 + 第一声设计）","feature":"开场演出","module":"F10.1 开场演出","raw":0.5,"gray":"未","days":0.5,"pri":"P2","sprint":"S3","role":"音频","dep":"PREP-05","type":"story"}];
+
+</script>
+<script>
+/* 声音即视野 · 项目管理看板
+   数据来自 backlog-故事清单.csv（data.js）
+   状态 / 处理人 / 备注 / 排序 / 日期 / 新建需求 的改动保存在浏览器 localStorage
+*/
+
+/* ---------- 常量 ---------- */
+const EPIC_NAME = {}, EPIC_COLOR = {};
+Object.keys(EPIC_DEF).forEach(k => { EPIC_NAME[k] = EPIC_DEF[k].name; EPIC_COLOR[k] = EPIC_DEF[k].color; });
+const EXTRA_COLOR = ['#0fc6c2', '#f54a45', '#7cb305', '#d97706', '#4e5969', '#8f959e'];
+
+// 四层：EPIC → FEATURE → STORY → TASK
+const TYPE_INFO = {
+  epic: { tag: 'EPIC', bg: '#eaf1ff', fg: '#245bdb' },
+  feature: { tag: 'FEATURE', bg: '#e6f0ff', fg: '#3370ff' },
+  story: { tag: 'STORY', bg: '#eaf7f0', fg: '#0a7a4b' },
+  task: { tag: 'TASK', bg: '#f2f3f5', fg: '#6b7075' }
+};
+const LEVEL_ORDER = { epic: 0, feature: 1, story: 2, task: 3 };
+const ROLE_AV = { '程序': '程', '音频': '音', '美术A': 'A', '美术B': 'B', '策划': '策' };
+const ROLE_IDX = { '程序': 0, '音频': 1, '美术A': 2, '美术B': 3, '策划': 4 };
+const GRAY_CLS = { '已': 'gy', '部分': 'gp', '未': 'gn' };
+
+// 承诺容量（人天）：P0+P1 正好铺满；超出部分即 P2 缓冲池
+const ROLE_CAP = { '程序': 16, '音频': 11.5, '美术A': 10.5, '美术B': 10, '策划': 12 };
+// 迭代可用容量（5 人 × 有效工作日）：S0 2d / S1 4d / S2 5d / S3 4d
+const SPRINT_CAP = { S0: 10, S1: 20, S2: 25, S3: 20 };
+
+const LS_KEY = 'tgd02-board-v1';
+const CUS_KEY = 'tgd02-custom-v1';
+const TRASH_KEY = 'tgd02-trash-v1';
+const BASE_YEAR = 2026;
+
+/* ---------- 运行时状态 ---------- */
+let ov = { st: {}, role: {}, note: {}, rank: {}, date: {}, parent: {}, open: {} };
+let custom = [];
+let trash = [];
+let view = 'story';
+let group = 'none';
+let showP2 = true;
+let dragId = null;
+let curId = null;
+let mode = 'view';           // view | new
+let filter = { sprint: '', pri: '', role: '', status: '', kw: '', epic: '' };
+
+try {
+  const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+  ov = Object.assign({ st: {}, role: {}, note: {}, rank: {}, date: {}, parent: {}, open: {} }, saved);
+} catch (e) {}
+['st', 'role', 'note', 'rank', 'date', 'parent', 'open'].forEach(k => { if (!ov[k] || typeof ov[k] !== 'object') ov[k] = {}; });
+try { custom = JSON.parse(localStorage.getItem(CUS_KEY) || '[]'); } catch (e) {}
+try { trash = JSON.parse(localStorage.getItem(TRASH_KEY) || '[]'); } catch (e) {}
+const save = () => localStorage.setItem(LS_KEY, JSON.stringify(ov));
+const saveCus = () => localStorage.setItem(CUS_KEY, JSON.stringify(custom));
+const saveTrash = () => localStorage.setItem(TRASH_KEY, JSON.stringify(trash));
+
+const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const $ = id => document.getElementById(id);
+const byId = id => STORIES.find(s => s.id === id);
+
+/* ---------- 合并新建需求 ---------- */
+custom.forEach(c => { if (!byId(c.id)) STORIES.push(c); });
+STORIES.forEach((s, i) => { if (s.__i == null) s.__i = i; });
+
+/* ---------- 四层树：EPIC / FEATURE 节点由数据派生 ---------- */
+const slug = t => String(t || '').replace(/[^A-Za-z0-9\u4e00-\u9fa5]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'X';
+let DERIVED = [];
+
+function buildDerived() {
+  DERIVED = [];
+  const seen = {};
+  const customEpic = {};
+  STORIES.forEach(s => { if (typeOf(s) === 'epic') customEpic[s.epic] = 1; });
+  STORIES.forEach(s => {
+    const ty = s.type || 'story';
+    const ek = s.epic;
+    if (!seen['e' + ek] && !customEpic[ek]) {
+      seen['e' + ek] = 1;
+      DERIVED.push({ id: 'E-' + ek, type: 'epic', epic: ek, title: EPIC_NAME[ek] || ek, parent: '', __d: 1 });
+    }
+  });
+  // feature 节点：来源于 story.feature，或自定义的 feature 节点
+  STORIES.forEach(s => {
+    const ty = s.type || 'story';
+    if (ty === 'epic') return;
+    const ek = s.epic;
+    let fid, title;
+    if (ty === 'feature') { fid = s.id; title = s.title; }
+    else if (ty === 'story' || ty === 'task') {
+      if (!s.feature) return;
+      fid = 'F-' + ek + '-' + slug(s.feature); title = s.feature;
+    }
+    if (!fid || seen['f' + fid]) return;
+    seen['f' + fid] = 1;
+    DERIVED.push({ id: fid, type: 'feature', epic: ek, title: title, parent: 'E-' + ek, __d: 1 });
+  });
+  // story / task 的默认父节点
+  STORIES.forEach(s => {
+    const ty = s.type || 'story';
+    if (ty === 'epic' || ty === 'feature') return;
+    const def = (ty === 'task') ? '' : (s.feature ? ('F-' + s.epic + '-' + slug(s.feature)) : ('E-' + s.epic));
+    s.parent = ov.parent[s.id] || s.parent || def;
+  });
+  DERIVED.forEach(d => { if (d.type === 'feature' && ov.parent[d.id]) d.parent = ov.parent[d.id]; });
+}
+buildDerived();
+
+const allNodes = () => STORIES.concat(DERIVED);
+function nodeById(id) { return STORIES.find(s => s.id === id) || DERIVED.find(d => d.id === id); }
+const parentOf = n => { const pid = ov.parent[n.id] || n.parent; return pid ? nodeById(pid) : null; };
+function kids(id) { return allNodes().filter(n => (ov.parent[n.id] || n.parent) === id); }
+function typeOf(n) { return n.type || 'story'; }
+function subDays(n) {
+  let t = 0;
+  kids(n.id).forEach(k => { t += (typeOf(k) === 'story' || typeOf(k) === 'task') ? (k.days || 0) + subDays(k) : subDays(k); });
+  return t;
+}
+function epicKeyOf(n) {
+  let cur = n, g = 0;
+  while (cur && g++ < 12) {
+    if (typeOf(cur) === 'epic') return cur.epic || (cur.id.indexOf('E-') === 0 ? cur.id.slice(2) : cur.id);
+    const p = parentOf(cur); if (!p) break;
+    cur = p;
+  }
+  return n.epic || '';
+}
+function pathOf(n) {
+  const out = []; let cur = n, g = 0;
+  while (cur && g++ < 12) { out.unshift(cur.title); const p = parentOf(cur); if (!p) break; cur = p; }
+  return out;
+}
+
+/* ---------- 派生 ---------- */
+function eff(s) {
+  return {
+    ...s,
+    status: ov.st[s.id] || 'Backlog',
+    role: ov.role[s.id] || s.role,
+    note: ov.note[s.id] || ''
+  };
+}
+const ALL = () => STORIES.map(eff);
+
+const rankOf = s => (ov.rank && ov.rank[s.id] != null ? ov.rank[s.id] : (s.__i || 0) * 1000);
+const sorted = arr => arr.slice().sort((a, b) => rankOf(a) - rankOf(b));
+
+function filtered() {
+  const kw = filter.kw.trim().toLowerCase();
+  return ALL().filter(s =>
+    (!filter.sprint || s.sprint === filter.sprint) &&
+    (!filter.pri || s.pri === filter.pri) &&
+    (!filter.role || s.role === filter.role) &&
+    (!filter.status || s.status === filter.status) &&
+    (!filter.epic || s.epic === filter.epic) &&
+    (!kw || s.title.toLowerCase().includes(kw) || s.id.toLowerCase().includes(kw) || s.feature.toLowerCase().includes(kw))
+  );
+}
+
+/* ---------- 甘特时间轴 ---------- */
+const pd = str => { const p = String(str).split('/'); return new Date(BASE_YEAR, +p[0] - 1, +p[1]); };
+const GKEYS = Object.keys(SPRINTS);
+const GSTART = new Date(Math.min.apply(null, GKEYS.map(k => pd(SPRINTS[k].start))));
+const GEND = new Date(Math.max.apply(null, GKEYS.map(k => pd(SPRINTS[k].end))));
+const NDAYS = Math.round((GEND - GSTART) / 864e5) + 1;
+const WD = ['日', '一', '二', '三', '四', '五', '六'];
+const dayAt = i => new Date(GSTART.getTime() + i * 864e5);
+const isWe = i => { const d = dayAt(i).getDay(); return d === 0 || d === 6; };
+const dlabel = i => { const d = dayAt(i); return (d.getMonth() + 1) + '/' + d.getDate(); };
+let TODAY = -1;
+(function () {
+  const n = new Date(); n.setHours(0, 0, 0, 0);
+  if (n >= GSTART && n <= GEND) TODAY = Math.round((n - GSTART) / 864e5);
+})();
+
+function rangeOf(s) {
+  const c = ov.date && ov.date[s.id];
+  if (c && c.s && c.e) { const a = pd(c.s), b = pd(c.e); if (a <= b) return { a: a, b: b }; }
+  const sp = SPRINTS[s.sprint];
+  if (!sp) return null;
+  return { a: pd(sp.start), b: pd(sp.end) };
+}
+const rangeIdx = r => ({ ia: Math.round((r.a - GSTART) / 864e5), ib: Math.round((r.b - GSTART) / 864e5) });
+
+/* ---------- 侧栏 ---------- */
+function renderNav() {
+  const list = filtered();
+  $('cStory').textContent = list.length;
+  $('cBoard').textContent = list.length;
+  $('cTrash').textContent = trash.length;
+}
+
+/* ---------- 顶部统计卡 ---------- */
+function renderStats() {
+  const list = filtered();
+  const all = ALL();
+  const days = list.reduce((a, s) => a + s.days, 0);
+  const d01 = list.filter(s => s.pri !== 'P2').reduce((a, s) => a + s.days, 0);
+  const done = all.filter(s => s.status === '完成');
+  const doneD = done.reduce((a, s) => a + s.days, 0);
+  const allD = all.reduce((a, s) => a + s.days, 0);
+  const pct = allD ? Math.round(doneD / allD * 100) : 0;
+
+  const cards = [
+    { k: '需求总数', v: list.length + '<small> / ' + STORIES.length + '</small>' },
+    { k: '工作量（人天）', v: days.toFixed(1), warn: days > 60 },
+    { k: 'P0 + P1 承诺量', v: d01.toFixed(1) + '<small> / 60</small>', cls: d01 > 60 ? 'warn' : 'ok' },
+    { k: '已完成', v: done.length + '<small> 条 · ' + doneD.toFixed(1) + ' 人天</small>' },
+    { k: '整体进度', v: pct + '<small>%</small>' }
+  ];
+  $('stats').innerHTML = cards.map(c =>
+    '<div class="card ' + (c.cls || (c.warn ? 'warn' : '')) + '"><div class="k">' + c.k + '</div><div class="v">' + c.v + '</div></div>'
+  ).join('');
+}
+
+/* ---------- 主视图 ---------- */
+function renderView() {
+  if (view === 'story') renderTable();
+  else if (view === 'board') renderBoard();
+  else if (view === 'gantt') renderGantt();
+  else if (view === 'trash') renderTrash();
+  else renderStatsView();
+}
+
+const GROUPS = {
+  none: null,
+  epic: { key: s => s.epic, label: k => EPIC_NAME[k] + ' <span class="n">' + k + '</span>' },
+  sprint: { key: s => s.sprint, label: k => (SPRINTS[k] ? SPRINTS[k].name : k) + ' <span class="n">' + (SPRINTS[k] ? SPRINTS[k].start + '–' + SPRINTS[k].end : '') + '</span>' },
+  role: { key: s => s.role, label: k => k }
+};
+
+function grouped(list, g) {
+  if (!g) return [{ label: null, arr: list }];
+  const buckets = {}, order = [];
+  list.forEach(s => { const k = g.key(s); if (!buckets[k]) { buckets[k] = []; order.push(k); } buckets[k].push(s); });
+  return order.map(k => ({ label: g.label(k), arr: buckets[k] }));
+}
+
+const EPIC_ORDER = Object.keys(EPIC_DEF);
+function sortNodes(arr) {
+  return arr.slice().sort((a, b) => {
+    const ta = typeOf(a), tb = typeOf(b);
+    if (ta === 'epic' && tb === 'epic') {
+      const ia = EPIC_ORDER.indexOf(a.epic), ib = EPIC_ORDER.indexOf(b.epic);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.id.localeCompare(b.id);
+    }
+    return rankOf(a) - rankOf(b);
+  });
+}
+
+function renderTable() {
+  const hit = filtered();
+  const show = new Set();
+  hit.forEach(s => {
+    show.add(s.id);
+    let p = parentOf(s), g = 0;
+    while (p && g++ < 12) { show.add(p.id); p = parentOf(p); }
+  });
+
+  let html = '<div class="tw"><table><thead><tr>' +
+    '<th>ID</th><th>需求（EPIC / FEATURE / STORY / TASK）</th><th>优先级</th><th>灰盒</th>' +
+    '<th style="text-align:right">人天</th><th>迭代</th><th>处理人</th><th>状态</th><th>依赖</th>' +
+    '</tr></thead><tbody>';
+  let n = 0;
+
+  function row(nd, depth) {
+    const ks = sortNodes(kids(nd.id).filter(k => show.has(k.id)));
+    const open = ov.open[nd.id] !== false;
+    const ty = typeOf(nd);
+    const ti = TYPE_INFO[ty];
+    const leaf = ty === 'story' || ty === 'task';
+    const e = eff(nd);
+    const days = leaf ? (nd.days || 0) : subDays(nd);
+    const st = STATUSES.indexOf(e.status);
+    const cls = (e.status === '完成' ? 'done ' : '') + (ty === 'epic' ? 'epic-row' : ty === 'feature' ? 'feat-row' : '');
+
+    html += '<tr class="' + cls + '">' +
+      '<td class="id" data-id="' + nd.id + '">' + (leaf ? nd.id : '') + '</td>' +
+      '<td class="title"><div class="tname" style="padding-left:' + (depth * 18) + 'px">' +
+      (ks.length ? '<span class="arw" data-tg="' + nd.id + '">' + (open ? '▾' : '▸') + '</span>'
+        : '<span class="arw none">·</span>') +
+      '<span class="tag" style="background:' + ti.bg + ';color:' + ti.fg + '">' + ti.tag + '</span>' +
+      '<span class="txt">' + esc(nd.title) + '</span>' +
+      (!leaf ? '<span class="sub">' + ks.length + ' 项 · ' + days.toFixed(1) + ' 人天</span>' : '') +
+      '</div></td>' +
+      '<td>' + (leaf ? '<span class="tag ' + String(nd.pri).toLowerCase() + '">' + nd.pri + '</span>' : '') + '</td>' +
+      '<td>' + (leaf ? '<span class="tag ' + (GRAY_CLS[nd.gray] || 'gn') + '">' + esc(nd.gray) + '</span>' : '') + '</td>' +
+      '<td class="num">' + days.toFixed(1) + '</td>' +
+      '<td>' + (leaf ? '<span class="tag p2">' + nd.sprint + '</span>' : '') + '</td>' +
+      '<td>' + (leaf ? '<span class="av r' + ROLE_IDX[e.role] + '">' + ROLE_AV[e.role] + '</span>' + e.role : '') + '</td>' +
+      '<td>' + (leaf ? '<span class="st s' + st + '" data-id="' + nd.id + '"><span class="d"></span>' + e.status + '</span>' : '') + '</td>' +
+      '<td style="color:#8f959e">' + (leaf ? esc(nd.dep || '—') : '') + '</td>' +
+      '</tr>';
+    n++;
+    if (ks.length && open) ks.forEach(k => row(k, depth + 1));
+  }
+
+  const roots = allNodes().filter(x => !parentOf(x) && show.has(x.id));
+  sortNodes(roots).forEach(r => row(r, 0));
+
+  if (!n) html += '<tr><td colspan="9"><div class="empty">没有符合条件的节点</div></td></tr>';
+  html += '</tbody></table></div>';
+  $('view').innerHTML = html;
+  $('view').querySelectorAll('td.id').forEach(td => td.onclick = () => openDw(td.dataset.id));
+  $('view').querySelectorAll('.arw[data-tg]').forEach(el => el.onclick = ev => {
+    ev.stopPropagation();
+    const id = el.dataset.tg;
+    ov.open[id] = ov.open[id] === false;
+    save(); renderTable();
+  });
+  $('view').querySelectorAll('.st').forEach(el => el.onclick = ev => { ev.stopPropagation(); cycleStatus(el.dataset.id); });
+}
+
+function cycleStatus(id) {
+  const i = STATUSES.indexOf(ov.st[id] || 'Backlog');
+  ov.st[id] = STATUSES[(i + 1) % STATUSES.length];
+  save(); renderAll();
+}
+function moveStatus(id, dir) {
+  const i = STATUSES.indexOf(ov.st[id] || 'Backlog');
+  ov.st[id] = STATUSES[Math.min(STATUSES.length - 1, Math.max(0, i + dir))];
+  save(); renderAll();
+}
+
+/* ---------- 看板（支持拖拽） ---------- */
+const ST_COLOR = ['#c9cdd4', '#3370ff', '#ff8800', '#9254de', '#00a870'];
+
+function renderBoard() {
+  const list = filtered();
+  let html = '<div class="board">';
+  STATUSES.forEach((st, i) => {
+    const arr = sorted(list.filter(s => s.status === st));
+    const d = arr.reduce((a, s) => a + s.days, 0);
+    html += '<div class="col"><div class="ch"><span style="width:7px;height:7px;border-radius:50%;background:' + ST_COLOR[i] + '"></span>' + st +
+      '<span class="n">' + arr.length + ' 条 · ' + d.toFixed(1) + '人天</span></div>' +
+      '<div class="cb" data-st="' + st + '">';
+    html += arr.map(s =>
+      '<div class="tk" data-id="' + s.id + '" draggable="true">' +
+      '<div class="t1"><span class="tag ' + s.pri.toLowerCase() + '">' + s.pri + '</span>' +
+      '<span class="tag ep" style="background:' + EPIC_COLOR[s.epic] + '22;color:' + EPIC_COLOR[s.epic] + '">' + s.id + '</span>' +
+      (parentOf(s) ? '<span class="pth" title="' + esc(pathOf(s).join(' › ')) + '">▸ ' + esc(parentOf(s).title) + '</span>' : '') +
+      '</div>' +
+      '<div class="t2">' + esc(s.title) + '</div>' +
+      '<div class="t3"><span class="av r' + ROLE_IDX[s.role] + '">' + ROLE_AV[s.role] + '</span>' + s.days.toFixed(1) + 'd' +
+      '<span class="mv" data-mv="-1" data-id="' + s.id + '">←</span>' +
+      '<span class="mv" data-mv="1" data-id="' + s.id + '">→</span></div></div>'
+    ).join('');
+    if (!arr.length) html += '<div style="color:#c9cdd4;font-size:12px;padding:10px 4px">拖卡片到这里</div>';
+    html += '</div></div>';
+  });
+  html += '</div>';
+  $('view').innerHTML = html;
+
+  $('view').querySelectorAll('.tk').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      dragId = el.dataset.id;
+      e.dataTransfer.setData('text/plain', el.dataset.id);
+      e.dataTransfer.effectAllowed = 'move';
+      el.classList.add('dragging');
+    });
+    el.addEventListener('dragend', () => { el.classList.remove('dragging'); clearLine(); });
+    el.onclick = e => {
+      if (e.target.dataset.mv) { e.stopPropagation(); moveStatus(e.target.dataset.id, parseInt(e.target.dataset.mv, 10)); return; }
+      openDw(el.dataset.id);
+    };
+  });
+
+  $('view').querySelectorAll('.cb').forEach(cb => {
+    cb.addEventListener('dragover', e => {
+      e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+      showLine(cb, e.clientY); cb.classList.add('over');
+    });
+    cb.addEventListener('dragleave', e => { if (!cb.contains(e.relatedTarget)) { cb.classList.remove('over'); clearLine(); } });
+    cb.addEventListener('drop', e => {
+      e.preventDefault(); cb.classList.remove('over'); clearLine();
+      dropTo(cb.dataset.st, cb, e.clientY);
+    });
+  });
+}
+
+/* 插入指示线 */
+function clearLine() { const l = document.querySelector('.dl'); if (l) l.remove(); document.querySelectorAll('.cb.over').forEach(c => c.classList.remove('over')); }
+function showLine(cb, y) {
+  clearLine();
+  const cards = [...cb.querySelectorAll('.tk')].filter(c => c.dataset.id !== dragId);
+  let target = null;
+  for (const c of cards) { const r = c.getBoundingClientRect(); if (y < r.top + r.height / 2) { target = c; break; } }
+  const line = document.createElement('div'); line.className = 'dl';
+  if (target) cb.insertBefore(line, target); else cb.appendChild(line);
+}
+function dropTo(status, cb, y) {
+  if (!dragId) return;
+  const cards = [...cb.querySelectorAll('.tk')].filter(c => c.dataset.id !== dragId);
+  let before = null, after = null;
+  for (const c of cards) { const r = c.getBoundingClientRect(); if (y < r.top + r.height / 2) { after = c; break; } before = c; }
+  let nr;
+  if (before && after) {
+    const s1 = byId(before.dataset.id), s2 = byId(after.dataset.id);
+    nr = (rankOf(eff(s1)) + rankOf(eff(s2))) / 2;
+  } else if (after) {
+    nr = rankOf(eff(byId(after.dataset.id))) - 500;
+  } else if (before) {
+    nr = rankOf(eff(byId(before.dataset.id))) + 500;
+  } else {
+    nr = 0;
+  }
+  ov.st[dragId] = status;
+  ov.rank[dragId] = nr;
+  save();
+  dragId = null;
+  renderAll();
+}
+
+/* ---------- 甘特图 ---------- */
+function renderGantt() {
+  const g = group === 'sprint' ? null : GROUPS[group];
+  let list = filtered();
+  if (!showP2) list = list.filter(s => s.pri !== 'P2');
+  list = sorted(list).sort((a, b) => {
+    const ra = rangeOf(a), rb2 = rangeOf(b);
+    const ia = ra ? rangeIdx(ra).ia : 999, ib = rb2 ? rangeIdx(rb2).ia : 999;
+    return ia - ib || rankOf(a) - rankOf(b);
+  });
+
+  let html = '<div class="gtools">' +
+    '<div class="seg" id="segG">' +
+    ['none:不分组', 'epic:按 Epic', 'role:按处理人'].map(o => {
+      const [v, t] = o.split(':');
+      return '<button data-g="' + v + '" class="' + ((group === 'sprint' ? 'none' : group) === v ? 'on' : '') + '">' + t + '</button>';
+    }).join('') + '</div>' +
+    '<label style="font-size:12px;color:#8f959e;display:flex;align-items:center;gap:5px">' +
+    '<input type="checkbox" id="ckP2"' + (showP2 ? ' checked' : '') + '> 显示 P2 缓冲</label>' +
+    '<span style="font-size:12px;color:#8f959e">条 = 迭代区间（详情里可改起止日期）· 点击条打开详情 · 卡片可在看板里拖拽</span>' +
+    '</div>';
+
+  html += '<div class="gwrap"><table><thead><tr><th class="gside">需求</th>';
+  for (let i = 0; i < NDAYS; i++) {
+    html += '<th class="day' + (isWe(i) ? ' we' : '') + (i === TODAY ? ' td' : '') + '"><b>' + dlabel(i) + '</b>' + WD[dayAt(i).getDay()] + '</th>';
+  }
+  html += '</tr></thead><tbody>';
+
+  grouped(list, g).forEach(b => {
+    if (b.label) {
+      const d = b.arr.reduce((a, s) => a + s.days, 0);
+      html += '<tr class="gh2"><td colspan="' + (NDAYS + 1) + '">' + b.label + ' <span class="n" style="font-weight:400;color:#8f959e">' + b.arr.length + ' 条 · ' + d.toFixed(1) + ' 人天</span></td></tr>';
+    }
+    b.arr.forEach(s => { html += ganttRow(s); });
+  });
+
+  if (!list.length) html += '<tr><td colspan="' + (NDAYS + 1) + '"><div class="empty">没有符合条件的Story</div></td></tr>';
+  html += '</tbody></table></div>';
+
+  html += '<div class="glegend">' + Object.keys(EPIC_NAME).map(k =>
+    '<span><i style="background:' + EPIC_COLOR[k] + '"></i>' + EPIC_NAME[k] + '</span>').join('') +
+    '<span><i style="background:#f54a45"></i>今天</span></div>';
+
+  $('view').innerHTML = html;
+  $('view').querySelectorAll('.gbar').forEach(el => el.onclick = () => openDw(el.dataset.id));
+  $('view').querySelectorAll('#segG button').forEach(b => b.onclick = () => { group = b.dataset.g; renderGantt(); });
+  const ck = $('ckP2'); if (ck) ck.onchange = () => { showP2 = ck.checked; renderGantt(); };
+}
+
+function ganttRow(s) {
+  const r = rangeOf(s);
+  let cells = '';
+  let ia = -1, ib = -2;
+  if (r) { const x = rangeIdx(r); ia = Math.max(0, x.ia); ib = Math.min(NDAYS - 1, x.ib); }
+  for (let i = 0; i < NDAYS; i++) {
+    const cls = 'cell' + (isWe(i) ? ' cwe' : '') + (i === TODAY ? ' ctd' : '');
+    if (i >= ia && i <= ib) {
+      if (i === ia) {
+        const span = ib - ia + 1;
+        cells += '<td class="' + cls + '" colspan="' + span + '">' +
+          '<div class="gbar' + (s.status === '完成' ? ' done' : '') + '" data-id="' + s.id + '"' +
+          ' style="background:' + EPIC_COLOR[s.epic] + '"' +
+          ' title="' + esc(s.id + ' · ' + s.title + ' · ' + s.days.toFixed(1) + '人天 · ' + s.role) + '">' +
+          '<span>' + s.days.toFixed(1) + 'd ' + esc(s.title) + '</span></div></td>';
+      }
+      continue;
+    }
+    cells += '<td class="' + cls + '"></td>';
+  }
+  return '<tr class="grow"><td class="gside"><div class="gname">' +
+    '<span class="av r' + ROLE_IDX[s.role] + '">' + ROLE_AV[s.role] + '</span>' +
+    '<span class="t">' + esc(s.title) + '</span>' +
+    '<span class="d">' + s.days.toFixed(1) + 'd</span></div></td>' + cells + '</tr>';
+}
+
+/* ---------- 统计报表 ---------- */
+function bar(label, p01, total, cap) {
+  const max = Math.max(total, cap || 0, 0.1);
+  const over = cap != null && total > cap + 0.001;
+  const base = over ? '#fbdcda' : '#dbe6ff';
+  const inner = over && p01 > cap ? '#f54a45' : '#3370ff';
+  const innerW = total ? (p01 / total * 100) : 0;
+  return '<div class="bar"><div>' + label + '</div>' +
+    '<div class="tr"><div class="fl" style="width:' + (total / max * 100) + '%;background:' + base + '">' +
+    '<div style="height:100%;width:' + innerW + '%;background:' + inner + '"></div></div>' +
+    (cap != null ? '<div class="cap" style="left:' + (cap / max * 100) + '%"></div>' : '') + '</div>' +
+    '<div class="tx"><b>' + total.toFixed(1) + '</b>' + (cap != null ? ' / ' + cap.toFixed(1) : '') + '</div></div>';
+}
+
+function renderStatsView() {
+  const all = ALL();
+  const sum = (arr, f) => arr.filter(f || (() => true)).reduce((a, s) => a + s.days, 0);
+
+  let roleHtml = '';
+  ROLES.forEach(r => {
+    const arr = all.filter(s => s.role === r);
+    roleHtml += bar(r, sum(arr, s => s.pri !== 'P2'), sum(arr), ROLE_CAP[r]);
+  });
+  const roleDone = ROLES.map(r => r + ' 已完成 ' + sum(all.filter(s => s.role === r && s.status === '完成')).toFixed(1)).join(' ／ ');
+
+  let spHtml = '';
+  Object.keys(SPRINTS).forEach(k => {
+    const arr = all.filter(s => s.sprint === k);
+    spHtml += bar(SPRINTS[k].name + ' <span style="color:#8f959e">' + SPRINTS[k].start + '–' + SPRINTS[k].end + '</span>',
+      sum(arr, s => s.pri !== 'P2'), sum(arr), SPRINT_CAP[k]);
+  });
+
+  let epHtml = '';
+  Object.keys(EPIC_NAME).forEach(k => {
+    const arr = all.filter(s => s.epic === k);
+    epHtml += bar(EPIC_NAME[k], sum(arr, s => s.pri !== 'P2'), sum(arr), null);
+  });
+
+  let priHtml = '';
+  ['P0', 'P1', 'P2'].forEach(p => {
+    const arr = all.filter(s => s.pri === p);
+    priHtml += bar('<span class="tag ' + p.toLowerCase() + '">' + p + '</span>', sum(arr), sum(arr), null);
+  });
+
+  let stHtml = '';
+  STATUSES.forEach(st => {
+    const arr = all.filter(s => s.status === st);
+    stHtml += bar(st, sum(arr), sum(arr), null);
+  });
+
+  $('view').innerHTML =
+    '<div class="sec"><h3>按处理人 · 负载 vs 承诺容量<span style="font-weight:400;color:#8f959e;font-size:12px">（深色=P0/P1 承诺量，浅色=P2 缓冲；竖线=容量）</span></h3>' +
+    roleHtml + '<div style="font-size:12px;color:#8f959e;margin-top:6px">' + roleDone + '</div></div>' +
+    '<div class="sec"><h3>按迭代 · 负载 vs 可用容量</h3>' + spHtml +
+    '<div style="font-size:12px;color:#8f959e;margin-top:6px">S2 / S3 超出部分全部是 P2 缓冲池，时间不够就从 P2 往下砍。</div></div>' +
+    '<div class="sec"><h3>按 Epic · 工作量分布</h3>' + epHtml + '</div>' +
+    '<div class="sec"><h3>按优先级</h3>' + priHtml + '</div>' +
+    '<div class="sec"><h3>按状态</h3>' + stHtml + '</div>';
+}
+
+/* ---------- 详情抽屉 ---------- */
+function openDw(id) {
+  const live = nodeById(id);
+  const tr = live ? null : trash.find(t => t.id === id);
+  const s = live || tr; if (!s) return;
+  curId = id; mode = tr ? 'trash' : 'view';
+  const e = eff(s);
+  const d = (ov.date && ov.date[id]) || (tr && tr._ov && tr._ov.date) || { s: '', e: '' };
+  $('dId').textContent = s.id + (tr ? '（回收站）' : '');
+
+  if (tr) {
+    const dt = new Date(tr._del);
+    const ts = (dt.getMonth() + 1) + '/' + dt.getDate() + ' ' +
+      String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
+    const o = tr._ov || {};
+    $('dBody').innerHTML =
+      '<div class="tt">' + esc(s.title) + '</div>' +
+      '<div class="row2"><div class="k">Epic</div><div class="v"><span class="tag ep" style="background:' + EPIC_COLOR[s.epic] + '22;color:' + EPIC_COLOR[s.epic] + '">' + esc(s.epicName) + '</span> <span style="color:#8f959e">' + s.epic + '</span></div></div>' +
+      '<div class="row2"><div class="k">Feature</div><div class="v">' + esc(s.feature) + '</div></div>' +
+      '<div class="row2"><div class="k">优先级</div><div class="v"><span class="tag ' + s.pri.toLowerCase() + '">' + s.pri + '</span></div></div>' +
+      '<div class="row2"><div class="k">工作量</div><div class="v">原估算 ' + s.raw.toFixed(1) + ' 人天 → 实际 <b>' + s.days.toFixed(1) + '</b> 人天</div></div>' +
+      '<div class="row2"><div class="k">处理人</div><div class="v"><span class="av r' + ROLE_IDX[s.role] + '">' + ROLE_AV[s.role] + '</span>' + s.role + '</div></div>' +
+      '<div class="row2"><div class="k">迭代</div><div class="v">' + (SPRINTS[s.sprint] ? SPRINTS[s.sprint].name : s.sprint) + '</div></div>' +
+      '<div class="row2"><div class="k">删除时间</div><div class="v">' + ts + '</div></div>' +
+      '<div class="row2"><div class="k">删除前状态</div><div class="v">' + (o.st || 'Backlog') + '</div></div>' +
+      '<div class="acts"><button class="btn pri" id="dRe">恢复此需求</button>' +
+      '<button class="btn" id="dPg" style="color:#f54a45;border-color:#f7c1bf">彻底删除</button></div>';
+    $('dRe').onclick = () => restoreStory(id);
+    $('dPg').onclick = () => { if (confirm('彻底删除 ' + id + '？不可恢复。')) purgeStory(id); };
+    $('mask').classList.add('on'); $('dw').classList.add('on');
+    return;
+  }
+
+  const ty = typeOf(s);
+  const leaf = ty === 'story' || ty === 'task';
+  const pri = s.pri || 'P1', raw = s.raw || 0, gray = s.gray || '未';
+  const ti = TYPE_INFO[ty];
+  const kidsN = kids(id);
+
+  const rows = [
+    ['类型', '<span class="tag" style="background:' + ti.bg + ';color:' + ti.fg + '">' + ti.tag + '</span>'],
+    ['所属 Epic', '<span class="tag ep" style="background:' + EPIC_COLOR[s.epic] + '22;color:' + EPIC_COLOR[s.epic] + '">' + esc(EPIC_NAME[s.epic] || s.epic) + '</span>'],
+    ['分支路径', '<span style="color:#8f959e">' + esc(pathOf(s).join(' › ')) + '</span>']
+  ];
+  if (leaf) rows.push(
+    ['Feature', esc(s.feature || '—')],
+    ['优先级', '<span class="tag ' + pri.toLowerCase() + '">' + pri + '</span>'],
+    ['灰盒状态', '<span class="tag ' + (GRAY_CLS[gray] || 'gn') + '">' + esc(gray) + '</span>'],
+    ['工作量', '原估算 ' + raw.toFixed(1) + ' 人天 → 实际 <b>' + s.days.toFixed(1) + '</b> 人天'],
+    ['迭代', (SPRINTS[s.sprint] ? SPRINTS[s.sprint].name : s.sprint) + ' <span style="color:#8f959e">' + (SPRINTS[s.sprint] ? SPRINTS[s.sprint].start + '–' + SPRINTS[s.sprint].end : '') + '</span>'],
+    ['依赖', esc(s.dep || '—')]
+  );
+  rows.push([leaf ? '子节点' : '子项', '<b>' + kidsN.length + '</b> 项' + (leaf ? '' : ' · 合计 <b>' + subDays(s).toFixed(1) + '</b> 人天')]);
+
+  $('dBody').innerHTML =
+    '<div class="tt">' + esc(s.title) + '</div>' +
+    rows.map(r => '<div class="row2"><div class="k">' + r[0] + '</div><div class="v">' + r[1] + '</div></div>').join('') +
+    '<div class="fm"><label>所属分支（改这里可以把这条并入其它分支）</label><div id="dPar"></div></div>' +
+    (leaf ? '<div class="row2"><div class="k">状态</div><div class="v" id="dSt"></div></div>' +
+      '<div class="row2"><div class="k">改处理人</div><div class="v" id="dRole"></div></div>' +
+      '<div class="fm"><label>甘特起止日期（留空 = 跟随迭代）</label>' +
+      '<div class="two"><input type="text" id="dS" placeholder="如 10/24" value="' + esc(d.s) + '">' +
+      '<input type="text" id="dE" placeholder="如 10/29" value="' + esc(d.e) + '"></div></div>' : '') +
+    '<div class="fm"><label>备注</label><textarea id="dNote" rows="3">' + esc(e.note) + '</textarea></div>' +
+    '<div class="acts"><button class="btn" id="dDel">清除自定义状态</button>' +
+    '<button class="btn" id="dRm" style="color:#f54a45;border-color:#f7c1bf">删除此需求</button>' +
+    '</div>' +
+    '<div style="font-size:11px;color:#a9aeb8;margin-top:6px">删除' + (leaf ? '' : '会连同其下所有子项一起') + '移入回收站，可在左侧「回收站」里恢复。</div>';
+
+  /* 所属分支下拉 */
+  $('dPar').innerHTML = parentOptions(s);
+  const ps = $('dParSel');
+  if (ps) ps.onchange = ev => setParent(id, ev.target.value);
+
+  if (leaf) {
+  $('dSt').innerHTML = STATUSES.map(st =>
+    '<button class="btn" data-st="' + st + '" style="' + (e.status === st ? 'background:#3370ff;border-color:#3370ff;color:#fff' : '') + ';margin-right:4px;margin-bottom:4px">' + st + '</button>'
+  ).join('');
+  $('dSt').querySelectorAll('[data-st]').forEach(b => b.onclick = () => { ov.st[id] = b.dataset.st; save(); openDw(id); renderAll(); });
+
+  $('dRole').innerHTML = ROLES.map(r =>
+    '<button class="btn" data-role="' + r + '" style="' + (e.role === r ? 'background:#3370ff;border-color:#3370ff;color:#fff' : '') + ';margin-right:4px;margin-bottom:4px">' + r + '</button>'
+  ).join('');
+  $('dRole').querySelectorAll('[data-role]').forEach(b => b.onclick = () => { ov.role[id] = b.dataset.role; save(); openDw(id); renderAll(); });
+
+  $('dS').oninput = ev => { setDate(id, ev.target.value, $('dE').value); };
+  $('dE').oninput = ev => { setDate(id, $('dS').value, ev.target.value); };
+  }
+
+  $('dNote').oninput = ev => { ov.note[id] = ev.target.value; save(); };
+  $('dDel').onclick = () => {
+    ['st', 'role', 'note', 'rank', 'date', 'parent', 'open'].forEach(k => { delete ov[k][id]; });
+    save(); openDw(id); renderAll();
+  };
+  const rm = $('dRm');
+  if (rm) rm.onclick = () => {
+    const msg = leaf
+      ? '删除需求 ' + id + '「' + s.title + '」？\n会移入回收站，可以恢复。'
+      : '删除「' + s.title + '」？\n它下面还有 ' + kidsN.length + ' 个子项，会一起移入回收站。';
+    if (confirm(msg)) removeStory(id);
+  };
+
+  $('mask').classList.add('on'); $('dw').classList.add('on');
+}
+
+function parentOptions(node) {
+  const ty = typeOf(node);
+  const want = ty === 'task' ? ['story'] : ty === 'story' ? ['feature', 'epic'] : ty === 'feature' ? ['epic'] : null;
+  if (!want) return '<div style="color:#8f959e">EPIC 是顶层，没有上级分支</div>';
+  const banned = {};
+  (function mark(n) { banned[n.id] = 1; kids(n.id).forEach(mark); })(node);
+  const cur = ov.parent[node.id] || node.parent || '';
+  let h = '<select id="dParSel" style="width:100%"><option value="">（不挂在任何分支下）</option>';
+  const walk = (n, depth) => {
+    if (!banned[n.id] && want.indexOf(typeOf(n)) >= 0) {
+      h += '<option value="' + n.id + '"' + (cur === n.id ? ' selected' : '') + '>' +
+        '　'.repeat(depth) + esc(n.title) + '</option>';
+    }
+    sortNodes(kids(n.id)).forEach(k => walk(k, depth + 1));
+  };
+  sortNodes(allNodes().filter(x => !parentOf(x))).forEach(r => walk(r, 0));
+  return h + '</select>';
+}
+
+function setParent(id, pid) {
+  const n = nodeById(id); if (!n) return;
+  const p = pid ? nodeById(pid) : null;
+  ov.parent[id] = pid;
+  n.parent = pid;
+  if (p) {
+    n.epic = epicKeyOf(p);
+    if (typeOf(p) === 'feature') n.feature = p.title;
+  }
+  save();
+  if (custom.find(c => c.id === id)) saveCus();
+  if (typeOf(n) === 'feature') buildDerived();
+  openDw(id); renderAll();
+}
+
+function setDate(id, a, b) {
+  if (!a && !b) { delete ov.date[id]; }
+  else { ov.date[id] = { s: a, e: b }; }
+  save();
+  if (view === 'gantt') renderGantt();
+}
+function closeDw() { $('mask').classList.remove('on'); $('dw').classList.remove('on'); curId = null; mode = 'view'; }
+
+/* ---------- 新建 / 删除需求 ---------- */
+function autoId(epic) {
+  let mx = 0;
+  STORIES.forEach(s => { if (s.epic === epic) { const m = /(\d+)\s*$/.exec(s.id); if (m) mx = Math.max(mx, +m[1]); } });
+  return epic + '-' + String(mx + 1).padStart(2, '0');
+}
+function featuresOf(epic) {
+  return [...new Set(STORIES.filter(s => s.epic === epic).map(s => s.feature))].sort();
+}
+
+function openNew() {
+  mode = 'new'; curId = null;
+  $('dId').textContent = '新建需求';
+  $('dBody').innerHTML =
+    '<div class="fm"><label class="req">标题</label><input type="text" id="nTitle" placeholder="例如：敌人接触时的光被吞没演出"></div>' +
+    '<div class="fm three">' +
+    '<div><label>类型</label><select id="nType">' +
+    ['epic', 'feature', 'story', 'task'].map(t => '<option value="' + t + '"' + (t === 'story' ? ' selected' : '') + '>' + TYPE_INFO[t].tag + '</option>').join('') +
+    '</select></div>' +
+    '<div style="grid-column:span 2"><label>并入到（所属分支）</label><div id="nParBox"></div></div>' +
+    '</div>' +
+    '<div class="fm two"><div><label>ID（留空自动生成）</label><input type="text" id="nId" placeholder="自动生成"></div>' +
+    '<div><label>依赖</label><input type="text" id="nDep" placeholder="如 MOVE-02"></div></div>' +
+    '<div class="fm three"><div><label>优先级</label><select id="nPri">' +
+    ['P0', 'P1', 'P2'].map(p => '<option value="' + p + '"' + (p === 'P1' ? ' selected' : '') + '>' + p + '</option>').join('') + '</select></div>' +
+    '<div><label>迭代</label><select id="nSprint">' + Object.keys(SPRINTS).map(k => '<option value="' + k + '">' + SPRINTS[k].name + '</option>').join('') + '</select></div>' +
+    '<div><label>处理人</label><select id="nRole">' + ROLES.map(r => '<option value="' + r + '">' + r + '</option>').join('') + '</select></div></div>' +
+    '<div class="fm three"><div><label>实际人天</label><input type="number" id="nDays" step="0.5" min="0" value="1"></div>' +
+    '<div><label>原估算</label><input type="number" id="nRaw" step="0.5" min="0" value="1"></div>' +
+    '<div><label>灰盒状态</label><select id="nGray">' + ['未', '部分', '已'].map(g => '<option value="' + g + '">' + g + '</option>').join('') + '</select></div></div>' +
+    '<div class="fm two"><div><label>甘特开始（留空=跟随迭代）</label><input type="text" id="nS" placeholder="如 10/30"></div>' +
+    '<div><label>甘特结束</label><input type="text" id="nE" placeholder="如 11/03"></div></div>' +
+    '<div class="fm two"><div><label>状态</label><select id="nStatus">' + STATUSES.map(s => '<option value="' + s + '">' + s + '</option>').join('') + '</select></div>' +
+    '<div><label>依赖</label><input type="text" id="nDep" placeholder="如 MOVE-02"></div></div>' +
+    '<div class="fm"><label>备注</label><textarea id="nNote" rows="3"></textarea></div>' +
+    '<div class="err" id="nErr"></div>' +
+    '<div class="acts"><button class="btn pri" id="nSave">创建</button><button class="btn" id="nCancel">取消</button></div>';
+
+  function rebuildParents() {
+    const t = $('nType').value;
+    const want = t === 'task' ? ['story'] : t === 'story' ? ['feature', 'epic'] : t === 'feature' ? ['epic'] : null;
+    const box = $('nParBox');
+    if (!want) { box.innerHTML = '<div style="color:#8f959e;font-size:12px">EPIC 是顶层，直接创建</div>'; return; }
+    let h = '<select id="nPar" style="width:100%">';
+    const walk = (n, depth) => {
+      if (want.indexOf(typeOf(n)) >= 0) h += '<option value="' + n.id + '">' + '　'.repeat(depth) + esc(n.title) + '</option>';
+      sortNodes(kids(n.id)).forEach(k => walk(k, depth + 1));
+    };
+    sortNodes(allNodes().filter(x => !parentOf(x))).forEach(r => walk(r, 0));
+    h += '</select>';
+    box.innerHTML = h;
+  }
+  $('nType').onchange = rebuildParents;
+  rebuildParents();
+  $('nSave').onclick = saveNew;
+  $('nCancel').onclick = closeDw;
+  $('mask').classList.add('on'); $('dw').classList.add('on');
+  setTimeout(() => $('nTitle').focus(), 30);
+}
+
+function nextNum(prefix) {
+  let mx = 0;
+  STORIES.forEach(s => { const m = new RegExp('^' + prefix + '(\\d+)$').exec(s.id); if (m) mx = Math.max(mx, +m[1]); });
+  return prefix + String(mx + 1).padStart(2, '0');
+}
+function genId(typ, p) {
+  if (typ === 'task') return nextNum('T-');
+  if (typ === 'story') return nextNum('S-');
+  if (typ === 'feature') {
+    const ek = p ? epicKeyOf(p) : 'X';
+    let base = 'F-' + ek + '-' + slug(p ? '' : ''), id, i = 1;
+    return (function () { let c; do { c = 'F-' + ek + '-F' + (i++); } while (nodeById(c)); return c; })();
+  }
+  if (typ === 'epic') {
+    let n = 1; while (EPIC_DEF['X' + n]) n++;
+    return 'E-X' + n;
+  }
+  return nextNum('S-');
+}
+
+function saveNew() {
+  const title = $('nTitle').value.trim();
+  if (!title) { $('nErr').textContent = '标题不能为空'; $('nTitle').focus(); return; }
+  const typ = $('nType').value;
+  const ps = $('nPar');
+  const pid = ps ? ps.value : '';
+  const p = pid ? nodeById(pid) : null;
+  if (typ !== 'epic' && !p) { $('nErr').textContent = '请选择要并入的分支'; return; }
+
+  let id = $('nId').value.trim() || genId(typ, p);
+  if (nodeById(id)) { $('nErr').textContent = 'ID「' + id + '」已存在'; return; }
+
+  let ek;
+  if (typ === 'epic') {
+    let n = 1; while (EPIC_DEF['X' + n]) n++;
+    ek = 'X' + n;
+    const color = EXTRA_COLOR[(n - 1) % EXTRA_COLOR.length];
+    EPIC_DEF[ek] = { name: title, color: color };
+    EPIC_NAME[ek] = title; EPIC_COLOR[ek] = color;
+    EPIC_ORDER.push(ek);
+  } else {
+    ek = epicKeyOf(p);
+  }
+
+  const days = parseFloat($('nDays').value) || 0;
+  const raw = parseFloat($('nRaw').value) || days;
+  const node = {
+    id: id, type: typ, epic: ek, title: title,
+    parent: typ === 'epic' ? '' : pid,
+    feature: (typ === 'story' || typ === 'task')
+      ? (p && typeOf(p) === 'feature' ? p.title : (p ? (p.feature || '') : ''))
+      : '',
+    raw: raw, gray: $('nGray').value, days: (typ === 'epic' || typ === 'feature') ? 0 : days,
+    pri: $('nPri').value, sprint: $('nSprint').value, role: $('nRole').value,
+    dep: $('nDep').value.trim(), __i: STORIES.length
+  };
+
+  STORIES.push(node);
+  custom.push(node);
+  saveCus();
+  if (node.parent) ov.parent[id] = node.parent;
+  ov.st[id] = $('nStatus').value;
+  if ($('nNote').value.trim()) ov.note[id] = $('nNote').value.trim();
+  if ($('nS').value.trim() || $('nE').value.trim()) ov.date[id] = { s: $('nS').value.trim(), e: $('nE').value.trim() };
+  save();
+  buildDerived();
+  fillSel($('fEpic'), Object.keys(EPIC_DEF).map(k => [k, EPIC_NAME[k]]));
+  closeDw();
+  filter.epic = ''; filter.pri = ''; filter.status = ''; filter.sprint = ''; filter.kw = '';
+  ['fEpic', 'fSprint', 'fPri', 'fStatus', 'fKw'].forEach(k => { const el = $(k); if (el) el.value = ''; });
+  renderAll();
+  openDw(id);
+}
+
+/* ---------- 删除 / 回收站 ---------- */
+function snapshot(id) {
+  return {
+    st: ov.st[id], role: ov.role[id], note: ov.note[id], rank: ov.rank[id],
+    date: ov.date[id], parent: ov.parent[id], open: ov.open[id]
+  };
+}
+function descendants(id) {
+  const out = [];
+  kids(id).forEach(k => { out.push(k); out.push.apply(out, descendants(k.id)); });
+  return out;
+}
+function removeStory(id) {
+  const s = nodeById(id); if (!s) return;
+  // 级联：连同所有子项一起进回收站
+  const subs = descendants(id);
+  [s].concat(subs).forEach(nd => {
+    const isCustom = !!custom.find(c => c.id === nd.id) || !nd.__d;
+    trash.push({
+      ...nd,
+      _del: new Date().toISOString(),
+      _ov: snapshot(nd.id),
+      _custom: isCustom && !!custom.find(c => c.id === nd.id)
+    });
+    const i = STORIES.findIndex(x => x.id === nd.id);
+    if (i >= 0) STORIES.splice(i, 1);
+    const j = custom.findIndex(c => c.id === nd.id);
+    if (j >= 0) custom.splice(j, 1);
+    ['st', 'role', 'note', 'rank', 'date', 'parent', 'open'].forEach(k => { if (ov[k]) delete ov[k][nd.id]; });
+  });
+  saveTrash(); saveCus(); save();
+  buildDerived();
+  closeDw(); renderAll();
+}
+function restoreStory(id) {
+  const i = trash.findIndex(t => t.id === id);
+  if (i < 0) return;
+  const t = trash[i];
+  const s = { ...t };
+  delete s._del; delete s._ov; delete s._custom;
+  STORIES.push(s);
+  if (t._custom) { custom.push(s); saveCus(); }
+  const o = t._ov || {};
+  ['st', 'role', 'note', 'rank', 'date', 'parent', 'open'].forEach(k => {
+    if (o[k] != null) ov[k][id] = o[k];
+  });
+  if (s.__i == null) s.__i = STORIES.length;
+  trash.splice(i, 1);
+  saveTrash(); save();
+  buildDerived();
+  closeDw(); renderAll();
+}
+function purgeStory(id) {
+  const i = trash.findIndex(t => t.id === id);
+  if (i >= 0) trash.splice(i, 1);
+  saveTrash();
+  closeDw(); renderAll();
+}
+function emptyTrash() {
+  if (!trash.length) return;
+  if (!confirm('彻底删除回收站里的 ' + trash.length + ' 条需求？此操作不可恢复。')) return;
+  trash = []; saveTrash(); renderAll();
+}
+
+function renderTrash() {
+  let html = '<div class="gtools">' +
+    '<span style="font-size:12px;color:#8f959e">删除的需求会进这里，可恢复或彻底删除。共 ' + trash.length + ' 条 · ' +
+    trash.reduce((a, t) => a + t.days, 0).toFixed(1) + ' 人天</span>' +
+    '<button class="btn" id="tkEmpty" style="margin-left:auto">清空回收站</button></div>';
+
+  html += '<div class="tw"><table><thead><tr>' +
+    '<th>ID</th><th>标题</th><th>Epic</th><th>优先级</th><th style="text-align:right">人天</th>' +
+    '<th>处理人</th><th>原迭代</th><th>删除时间</th><th>操作</th>' +
+    '</tr></thead><tbody>';
+  trash.slice().reverse().forEach(t => {
+    const d = new Date(t._del);
+    const ts = (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
+      String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    html += '<tr>' +
+      '<td class="id" data-id="' + t.id + '">' + t.id + '</td>' +
+      '<td class="title">' + esc(t.title) + '</td>' +
+      '<td><span class="tag ep" style="background:' + EPIC_COLOR[t.epic] + '22;color:' + EPIC_COLOR[t.epic] + '">' + esc(t.epicName) + '</span></td>' +
+      '<td><span class="tag ' + t.pri.toLowerCase() + '">' + t.pri + '</span></td>' +
+      '<td class="num">' + t.days.toFixed(1) + '</td>' +
+      '<td><span class="av r' + ROLE_IDX[t.role] + '">' + ROLE_AV[t.role] + '</span>' + t.role + '</td>' +
+      '<td><span class="tag p2">' + t.sprint + '</span></td>' +
+      '<td style="color:#8f959e">' + ts + '</td>' +
+      '<td><button class="btn" data-re="' + t.id + '">恢复</button> ' +
+      '<button class="btn" data-pg="' + t.id + '" style="color:#f54a45;border-color:#f7c1bf">彻底删除</button></td>' +
+      '</tr>';
+  });
+  if (!trash.length) html += '<tr><td colspan="9"><div class="empty">回收站是空的</div></td></tr>';
+  html += '</tbody></table></div>';
+
+  $('view').innerHTML = html;
+  $('view').querySelectorAll('td.id').forEach(td => td.onclick = () => openDw(td.dataset.id));
+  $('view').querySelectorAll('[data-re]').forEach(b => b.onclick = () => restoreStory(b.dataset.re));
+  $('view').querySelectorAll('[data-pg]').forEach(b => b.onclick = () => {
+    if (confirm('彻底删除 ' + b.dataset.pg + '？不可恢复。')) purgeStory(b.dataset.pg);
+  });
+  const tk = $('tkEmpty'); if (tk) tk.onclick = emptyTrash;
+}
+
+/* ---------- 导出 ---------- */
+function exportCsv() {
+  const list = sorted(filtered());
+  const head = ['类型', 'Epic', '分支路径', 'Story ID', 'Story', 'Feature', '模块', '原估算', '灰盒状态', '实际人天', '优先级', 'Sprint', '角色', '依赖', '状态', '开始', '结束', '备注'];
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const lines = [head.map(q).join(',')].concat(list.map(s => {
+    const d = (ov.date && ov.date[s.id]) || { s: '', e: '' };
+    return [TYPE_INFO[typeOf(s)].tag, EPIC_NAME[s.epic] || s.epic, pathOf(s).slice(0, -1).join(' > '),
+      s.id, s.title, s.feature, s.module || '', s.raw, s.gray, s.days, s.pri, s.sprint, s.role, s.dep, s.status, d.s, d.e, s.note].map(q).join(',');
+  }));
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tapd-board-导出.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* ---------- 初始化 ---------- */
+function renderAll() { renderNav(); renderStats(); renderView(); }
+function fillSel(el, pairs) {
+  el.innerHTML = '<option value="">全部</option>' + pairs.map(p => '<option value="' + p[0] + '">' + p[1] + '</option>').join('');
+}
+
+(function init() {
+  fillSel($('fEpic'), Object.keys(EPIC_NAME).map(k => [k, EPIC_NAME[k]]));
+  fillSel($('fSprint'), Object.keys(SPRINTS).map(k => [k, SPRINTS[k].name]));
+  fillSel($('fPri'), [['P0', 'P0 必须有'], ['P1', 'P1 才完整'], ['P2', 'P2 有余力']]);
+  fillSel($('fRole'), ROLES.map(r => [r, r]));
+  fillSel($('fStatus'), STATUSES.map(s => [s, s]));
+
+  const bind = (el, key) => el.addEventListener('change', () => { filter[key] = el.value; renderAll(); });
+  bind($('fEpic'), 'epic'); bind($('fSprint'), 'sprint'); bind($('fPri'), 'pri'); bind($('fRole'), 'role'); bind($('fStatus'), 'status');
+  $('fKw').addEventListener('input', () => { filter.kw = $('fKw').value; renderAll(); });
+
+  const TITLES = { story: '需求', board: '看板', gantt: '甘特图', stats: '统计报表', trash: '回收站' };
+  const CRUMBS = {
+    story: '全部 Story · 点击 ID 打开详情',
+    board: '按状态分列 · 直接拖拽卡片 · ← → 也可移动',
+    gantt: '时间轴 ' + dlabel(0) + ' – ' + dlabel(NDAYS - 1) + ' · 条 = 迭代区间',
+    stats: '容量与负载',
+    trash: '已删除的需求 · 可恢复或彻底删除'
+  };
+
+  document.querySelectorAll('.side .item[data-view]').forEach(el => el.onclick = () => {
+    view = el.dataset.view;
+    document.querySelectorAll('.side .item[data-view]').forEach(x => x.classList.toggle('on', x === el));
+    $('vTitle').textContent = TITLES[view];
+    $('vCrumb').textContent = CRUMBS[view];
+    $('toolbar').style.display = (view === 'stats' || view === 'gantt' || view === 'trash') ? 'none' : 'flex';
+    renderView();
+  });
+
+  $('btnNew').onclick = openNew;
+  $('btnExport').onclick = exportCsv;
+  $('btnReset').onclick = () => {
+    if (!confirm('清除所有本地改动（状态 / 处理人 / 排序 / 日期 / 备注）？\n新建的需求和回收站不会被删除。')) return;
+    ov = { st: {}, role: {}, note: {}, rank: {}, date: {} }; save(); renderAll();
+  };
+  $('dX').onclick = closeDw;
+  $('mask').onclick = closeDw;
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDw(); });
+
+  $('vCrumb').textContent = CRUMBS.story;
+  renderAll();
+})();
+
+</script>
+</body>
+</html>
